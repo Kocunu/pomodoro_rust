@@ -1,0 +1,70 @@
+//Pomodoro Timer
+use std::time::{Duration, Instant};
+use std::thread;
+use clap::App;
+
+trait Timer{
+
+    fn start_timer(&mut self);
+    fn stop_timer(&mut self);
+    fn count_sessions(&mut self);
+}
+
+pub struct Pomodoro {
+    count_timer: Duration,
+    is_break: bool,
+}
+
+impl Timer for Pomodoro{
+    fn start_timer(&mut self) {
+        if !self.is_break{
+            loop {
+                println!("Timer Start");
+                let start_time = Instant::now();
+                thread::sleep(Duration::from_secs(25));
+                let elapsed_time = start_time.elapsed();
+                self.count_timer += elapsed_time;
+                println!("Timer: {:?}", elapsed_time);
+            }
+        }        
+    }
+
+    fn stop_timer(&mut self) {
+        if self.is_break{
+            println!("Timer Stopped")
+        }
+        else {
+            self.is_break = true;
+            println!("Timer Stopped")
+        }
+        
+    }
+
+    fn count_sessions(&mut self) {
+        println!("Total Elapsed Time: {:?}",self.count_timer)
+        
+    }
+}
+
+fn main (){
+
+    let mut pomodoro = Pomodoro {
+        count_timer: Duration::new(0, 0),
+        is_break: false,
+    };
+
+    let matches = App::new("Pomodoro")
+        .version("1.0")
+        .author("Koc Alican")
+        .subcommand(App::new("start").about("Startet den Timer"))
+        .subcommand(App::new("stop").about("Stoppt den Timer"))
+        .subcommand(App::new("count").about("Zeigt die Gesamtdauer der Sitzung an"))
+        .get_matches();
+
+    match matches.subcommand_name() {
+        Some("start") => pomodoro.start_timer(),
+        Some("stop") => pomodoro.stop_timer(),
+        Some("count") => pomodoro.count_sessions(),
+        _ => println!("Ungültiges Kommando. Verwende 'start', 'stop' oder 'count'")
+    }
+}
